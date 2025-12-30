@@ -84,11 +84,25 @@ ML logic, and web views decoupled.
 git clone https://github.com/imaashu0486/ashish-quant-studio.git
 cd ashish-quant-studio
 python -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+```
+Activate the virtual environment:
+```bash
+# Linux / macOS
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+```
+Install dependencies and start the server:
+```bash
 pip install -r requirements.txt
 python manage.py runserver
+```
 
-Access the application at: http://127.0.0.1:8000/
+Access the application at:
+```bash
+http://127.0.0.1:8000/
+```
 
 
 ## Deployment
