@@ -1,15 +1,12 @@
 from pathlib import Path
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'dev-secret-key'     
+SECRET_KEY = 'dev-secret-key'
 
 DEBUG = True
-ALLOWED_HOSTS = [
-    "ashish-quant-studio.onrender.com",
-    ".onrender.com",
-    "localhost",
-    "127.0.0.1",
-]
+
+ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://ashish-quant-studio.onrender.com",
