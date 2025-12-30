@@ -4,7 +4,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'dev-secret-key'     # ok for college project
 
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "ashish-quant-studio.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
