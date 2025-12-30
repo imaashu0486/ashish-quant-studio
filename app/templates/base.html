@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}Ashish Quant Studio{% endblock %}</title>
+
+  <!-- Tailwind quick helper (CDN) - only for utility classes; final design driven by dashboard.css -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Plotly (kept for existing plot_div) -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="{% static 'app/css/dashboard.css' %}">
+
+  <!-- Prevent ugly theme flash -->
+  <script>
+    (function () {
+      try {
+        const saved = localStorage.getItem('aqs-theme');
+        const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+        const theme = saved || (prefersLight ? 'light' : 'dark');
+        document.documentElement.setAttribute('data-theme', theme);
+        document.cookie = "theme=" + theme + "; path=/; SameSite=Lax";
+      } catch (e) {}
+    })();
+  </script>
+
+  {% block head_extra %}{% endblock %}
+</head>
+
+<body class="min-h-full transition-colors bg-app-bg text-app-fg">
+  <header class="site-header sticky top-0 z-50 backdrop-blur-sm">
+    <div class="container">
+      <div class="header-inner">
+        <a href="{% url 'home' %}" class="brand">Ashish Ranjan — Quant Dashboard</a>
+
+        <nav class="nav" aria-label="Main navigation">
+          <a href="{% url 'home' %}" class="nav-link">Home</a>
+          <a href="{% url 'search' %}" class="nav-link">Predict</a>
+          <a href="https://www.nseindia.com/" target="_blank" rel="noreferrer" class="nav-link">NSE</a>
+
+          <button id="themeToggle" class="theme-toggle" type="button" title="Toggle theme (T)" aria-pressed="false">
+            <span id="themeLabel" class="theme-label">Dark</span>
+            <span class="theme-switch" aria-hidden="true"><span id="themeKnob" class="theme-knob"></span></span>
+          </button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main-area">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© 2025 Ashish Ranjan. Built with Django, Plotly, Tailwind.</p>
+    </div>
+  </footer>
+
+  <script src="{% static 'app/js/dashboard.js' %}"></script>
+
+  <!-- Theme + keyboard script (keeps 'T' toggle) -->
+  <script>
+    (function (){
+      const root = document.documentElement;
+      const body = document.body;
+      const btn = document.getElementById('themeToggle');
+      const knob = document.getElementById('themeKnob');
+      const lab = document.getElementById('themeLabel');
+
+      function applyBodyColors(theme) {
+        if (theme === 'light') {
+          body.classList.remove('bg-app-bg-dark','text-app-fg-dark');
+          body.classList.add('bg-app-bg-light','text-app-fg-light');
+        } else {
+          body.classList.remove('bg-app-bg-light','text-app-fg-light');
+          body.classList.add('bg-app-bg-dark','text-app-fg-dark');
+        }
+      }
+
+      function setTheme(next) {
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('aqs-theme', next);
+        document.cookie = "theme=" + next + "; path=/; SameSite=Lax";
+        lab.textContent = next === 'light' ? 'Light' : 'Dark';
+        knob.style.transform = (next === 'light') ? 'translateX(18px)' : 'translateX(0)';
+        btn.setAttribute('aria-pressed', next === 'light');
+        applyBodyColors(next);
+      }
+
+      function currentTheme(){ return root.getAttribute('data-theme') || 'dark'; }
+      function toggleTheme(){ const cur = currentTheme(); setTheme(cur === 'dark' ? 'light' : 'dark'); }
+
+      // init
+      // init
+    setTheme(currentTheme());
+    btn.addEventListener('click', toggleTheme);
+
+    // Only toggle on SHIFT + T, and never while user is typing in an input/textarea/contenteditable
+    window.addEventListener('keydown', (e) => {
+      try {
+        const active = document.activeElement;
+        const isTyping = active && (
+          active.tagName === 'INPUT' ||
+          active.tagName === 'TEXTAREA' ||
+          active.isContentEditable
+        );
+        if (isTyping) return; // do not trigger while typing
+
+        // Require SHIFT + T (uppercase T). This prevents lowercase 't' from toggling.
+        if (e.key === 'T' && e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          e.preventDefault();
+          toggleTheme();
+        }
+      } catch (err) {
+        // fail silently if something unexpected happens
+      }
+    });
+
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Home — Ashish Quant Studio{% endblock %}
+
+{% block content %}
+<section class="space-y-6 py-6">
+  <!-- Top strip: indices -->
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Top Indices</h2>
+      <div class="controls">
+        <button id="idx-scroll-left" aria-label="Scroll left">‹</button>
+        <button id="idx-scroll-right" aria-label="Scroll right">›</button>
+      </div>
+    </div>
+
+    <div id="topIndicesTrack" class="indices-track" role="list" tabindex="0">
+      {% for c in index_cards %}
+        <div class="idx-card" role="listitem" tabindex="0" data-symbol="{{ c.symbol }}" data-name="{{ c.name }}">
+          <div class="idx-left">
+            <div class="idx-name">{{ c.name }}</div>
+            <div class="idx-last">{{ c.last }}</div>
+          </div>
+          <div class="idx-right {% if c.cls %}{{ c.cls }}{% endif %}">
+            <div class="idx-change">{% if c.cls == 'green' %}▲{% else %}▼{% endif %} {{ c.chg_abs }}</div>
+            <div class="idx-pct">{{ c.chg_pct }}</div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Leaders: heatmap/tiles -->
+  <div class="panel">
+    <div class="panel-head"><h3>Market Leaders</h3></div>
+    <div class="panel-body">
+      <div id="leaders" class="leaders">
+        <!-- server inserted plot/heatmap -->
+        {{ plot_div_left|safe }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Movers + Quick Picks -->
+  <div class="grid-3">
+    <div class="panel small">
+      <h4>Top Gainers</h4>
+      <ul class="movelist" id="gainers">
+        {% for r in gainers %}
+          <li class="mover-row" data-symbol="{{ r.t }}"><a href="/predict/{{ r.t }}/1/">{{ r.t }}</a><span class="mover-meta">{{ r.close }} · {{ r.pct_str }}%</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="panel small">
+      <h4>Top Losers</h4>
+      <ul class="movelist" id="losers">
+        {% for r in losers %}
+          <li class="mover-row" data-symbol="{{ r.t }}"><a href="/predict/{{ r.t }}/1/">{{ r.t }}</a><span class="mover-meta">{{ r.close }} · {{ r.pct_str }}%</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="panel small">
+      <h4>Quick Picks</h4>
+      <div class="chips">
+        {% for t in chips %}
+          <a href="/predict/{{ t }}/1/" class="chip">{{ t }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,294 @@
+/* dashboard.css — complete replacement
+   Dark-first design, responsive, clean typography and spacing
+   Works with data-theme="dark" or "light" on <html>
+*/
+
+/* ---------- Theme variables ---------- */
+:root{
+  --bg: #0b1220;
+  --card: #0f1724;
+  --panel-border: rgba(255,255,255,0.04);
+  --muted: #94a3b8;
+  --muted-2: #9aa7b8;
+  --fg: #e6eef8;
+  --accent: #22c55e;
+  --accent-2: #3b82f6;
+  --loss: #ff6b6b;
+  --glass: rgba(255,255,255,0.02);
+  --radius: 12px;
+  --container: 1200px;
+  --shadow: 0 10px 30px rgba(2,6,23,0.55);
+  --shadow-soft: 0 6px 18px rgba(2,6,23,0.35);
+  --gap: 14px;
+  --index-card-width: 260px;
+  --ui-font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+/* light theme overrides */
+[data-theme='light']{
+  --bg: #f6f8fb;
+  --card: #ffffff;
+  --panel-border: rgba(10,18,28,0.06);
+  --muted: #475569;
+  --muted-2: #6b7280;
+  --fg: #0b1220;
+  --glass: rgba(0,0,0,0.03);
+  --shadow: 0 10px 30px rgba(2,6,23,0.06);
+  --shadow-soft: 0 6px 18px rgba(2,6,23,0.04);
+}
+
+/* ---------- Base / layout ---------- */
+* { box-sizing: border-box; }
+html,body { height:100%; margin:0; padding:0; }
+body{
+  font-family: var(--ui-font);
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+}
+
+/* container helper */
+.container{ max-width:var(--container); margin:0 auto; padding:18px; }
+
+/* ---------- Header ---------- */
+.site-header{
+  position:sticky; top:0; z-index:60;
+  background: linear-gradient(180deg, rgba(0,0,0,0.24), transparent);
+  border-bottom:1px solid var(--panel-border);
+  backdrop-filter: blur(6px);
+}
+.header-inner{ display:flex; align-items:center; justify-content:space-between; padding:12px 0; gap:12px; }
+.brand{ font-weight:700; font-size:1.05rem; letter-spacing:0.2px; color:var(--fg); text-decoration:none; }
+.nav{ display:flex; align-items:center; gap:10px; }
+
+/* nav links */
+.nav-link{
+  padding:8px 12px; border-radius:999px; text-decoration:none; color:var(--fg);
+  background:transparent; border:1px solid transparent; font-size:0.95rem;
+}
+.nav-link:hover{ background: var(--glass); transform: translateY(-1px); transition: all .12s ease; }
+
+/* theme toggle */
+.theme-toggle{ display:inline-flex; gap:8px; align-items:center; padding:6px 10px; border-radius:999px; cursor:pointer; background:transparent; border:1px solid var(--panel-border); }
+.theme-label{ font-size:12px; color:var(--muted); }
+
+/* ---------- Panels ---------- */
+.panel{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+  border:1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding:14px;
+  box-shadow: var(--shadow-soft);
+}
+.panel + .panel{ margin-top:var(--gap); }
+
+/* small heading */
+.panel-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+.panel h2, .panel h3, .panel h4{ margin:0; color:var(--fg); }
+
+/* ---------- Indices track (Top Indices) ---------- */
+.indices-track{
+  display:flex; gap:var(--gap); overflow-x:auto; padding:8px 6px; scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+}
+.indices-track::-webkit-scrollbar{ height:9px; }
+.indices-track::-webkit-scrollbar-thumb{ background:rgba(255,255,255,0.04); border-radius:999px; }
+
+/* index card */
+.idx-card{
+  flex: 0 0 var(--index-card-width);
+  min-width: var(--index-card-width);
+  padding:16px;
+  border-radius:10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
+  transition: transform .14s ease, box-shadow .14s ease;
+  cursor:pointer;
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.idx-card:hover{ transform:translateY(-6px); box-shadow:var(--shadow); }
+.idx-card:focus{ outline: 3px solid rgba(34,197,94,0.09); outline-offset:3px; }
+
+/* index left (name + number) */
+.idx-left{ display:flex; flex-direction:column; gap:4px; }
+.idx-name{ font-size:12px; color:var(--muted); font-weight:700; letter-spacing:0.3px; text-transform:uppercase; }
+.idx-last{ font-size:1.45rem; font-weight:900; color:var(--fg); }
+
+/* index right (change) */
+.idx-right{ display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:86px; text-align:right; }
+.idx-change{ font-weight:800; font-size:0.96rem; color:var(--muted); display:flex; align-items:center; gap:6px; justify-content:flex-end; }
+.idx-pct{ font-size:12px; color:var(--muted-2); }
+
+/* green / red states */
+.idx-right.green .idx-change{ color: var(--accent); }
+.idx-right.red .idx-change{ color: var(--loss); }
+
+/* ---------- Leaders / heatmap ---------- */
+.leaders{ min-height:88px; display:block; }
+.hm{ display:grid; grid-template-columns: repeat(12, 1fr); gap:10px; }
+@media (max-width:1200px){ .hm{ grid-template-columns: repeat(8, 1fr); } }
+@media (max-width:900px){ .hm{ grid-template-columns: repeat(6, 1fr); } }
+@media (max-width:640px){ .hm{ grid-template-columns: repeat(3, 1fr); } }
+.tile{ border-radius:10px; padding:10px; min-height:76px; display:flex; flex-direction:column; justify-content:space-between; color:var(--fg); position:relative; transition:all .12s ease; background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); }
+.tile:hover{ transform:translateY(-4px); box-shadow:var(--shadow-soft); }
+
+/* tile text */
+.tile .sym{ font-weight:800; font-size:0.95rem; }
+.tile .price{ font-weight:700; font-size:1rem; color:var(--muted-2); }
+.tile .pct{ font-weight:800; }
+
+/* ---------- Movers / lists ---------- */
+.grid-3{ display:grid; grid-template-columns: 1fr; gap:var(--gap); }
+@media(min-width:1024px){ .grid-3{ grid-template-columns: 1fr 1fr 1fr; } }
+
+.movelist{ list-style:none; margin:0; padding:0; display:block; }
+.movelist li{ display:flex; justify-content:space-between; align-items:center; padding:10px 8px; border-bottom:1px dashed rgba(255,255,255,0.02); gap:12px; }
+.movelist li a{ font-weight:800; color:var(--fg); text-decoration:none; }
+.movelist li .mover-meta{ color:var(--muted-2); font-size:0.95rem; }
+
+/* quick picks chips */
+.chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.chip{
+  display:inline-flex; align-items:center; padding:8px 10px; border-radius:999px; background:var(--glass);
+  color:var(--fg); text-decoration:none; font-weight:700; border:1px solid var(--panel-border);
+}
+.chip:hover{ transform:translateY(-2px); transition:all .12s ease; }
+
+/* ---------- Form ---------- */
+.max-w-form{ max-width:700px; margin:0 auto; }
+.form-grid{ display:grid; gap:10px; }
+.label{ font-weight:800; color:var(--muted); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.8px; }
+input#ticker{ padding:12px 14px; border-radius:10px; border:1px solid var(--panel-border); background:transparent; color:var(--fg); font-weight:700; font-size:1rem; }
+
+/* primary button */
+.btn-primary{
+  display:inline-block; padding:10px 16px; border-radius:12px; background:var(--accent); color:#fff; font-weight:800; border:none; cursor:pointer;
+}
+.btn-primary:hover{ filter:brightness(.98); transform:translateY(-2px); }
+
+/* ---------- Result page helpers ---------- */
+.plotly-container{ min-height:220px; margin-top:6px; }
+.feature-table{ max-height:420px; overflow:auto; padding-top:8px; }
+
+/* feature table style */
+.feature-table table{ width:100%; border-collapse:collapse; }
+.feature-table th, .feature-table td{ padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.03); text-align:left; color:var(--fg); }
+.feature-table th{ font-weight:800; color:var(--muted-2); background:transparent; position:sticky; top:0; }
+
+/* result summary cards */
+.result-summary{ display:flex; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
+.result-card{ flex:1; min-width:220px; padding:12px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent); border:1px solid var(--panel-border); }
+.result-card .big{ font-size:1.4rem; font-weight:900; color:var(--fg); }
+.result-card .muted{ color:var(--muted); font-weight:700; }
+
+/* copy/download buttons in result */
+#copyLink, #downloadCsv{ padding:8px 10px; border-radius:10px; border:none; cursor:pointer; font-weight:800; text-decoration:none; color:#fff; }
+#copyLink{ background:var(--accent-2); }
+#downloadCsv{ background:var(--accent); }
+
+/* ---------- Tooltip (floating) ---------- */
+.aqs-tooltip{
+  position:fixed; z-index:9999; pointer-events:none;
+  max-width:420px; padding:10px 12px; border-radius:10px;
+  background: rgba(3,7,18,0.88); color:#fff; font-size:13px; box-shadow:var(--shadow);
+  opacity:0; transform: translateY(6px) scale(.98); transition:opacity .12s ease, transform .12s ease;
+}
+[data-theme='light'] .aqs-tooltip{ background: #fff; color:var(--fg); border:1px solid rgba(0,0,0,0.06); box-shadow:0 8px 20px rgba(2,6,23,0.06); }
+.aqs-tooltip.show{ opacity:1; transform: translateY(0) scale(1); }
+.aqs-tooltip .t-title{ font-weight:900; font-size:14px; margin-bottom:6px; }
+.aqs-tooltip .t-row{ color: rgba(255,255,255,0.88); }
+[data-theme='light'] .aqs-tooltip .t-row{ color: rgba(11,18,32,0.8); }
+
+/* ---------- Small responsive tweaks ---------- */
+@media (max-width: 900px){
+  .idx-card{ flex:0 0 46%; min-width:46%; }
+  .idx-last{ font-size:1.1rem; }
+  .grid-3{ grid-template-columns: 1fr; }
+  .container{ padding:12px; }
+}
+
+/* ---------- Accessibility helpers ---------- */
+button:focus, a:focus, input:focus { outline: 3px solid rgba(34,197,94,0.09); outline-offset:2px; }
+
+/* ---------- Tooltip z-index & visibility (force to top) ---------- */
+.aqs-tooltip{
+  position: fixed !important;      /* fixed avoids parent clipping/overflow */
+  z-index: 2147483647 !important;  /* extremely high so nothing can overlap it */
+  pointer-events: none !important; /* don't block clicks */
+  box-shadow: 0 18px 40px rgba(2,6,23,0.6);
+}
+
+/* If you used .aqs-tooltip.show earlier, keep its transition behavior */
+.aqs-tooltip.show{ opacity:1; transform: translateY(0) scale(1); }
+
+/* ---------- Gainer / Loser row coloring ---------- */
+/* Add color to the right-side meta when row has class green/red */
+.mover-row.green .mover-meta { color: var(--accent) !important; font-weight:800; }
+.mover-row.red .mover-meta   { color: var(--loss)   !important; font-weight:800; }
+
+/* Also color the ticker text a bit for emphasis */
+.mover-row.green a { color: var(--accent) !important; }
+.mover-row.red a   { color: var(--loss) !important; }
+
+/* If list is inside a light theme, ensure contrast (keeps variables) */
+[data-theme='light'] .mover-row.green .mover-meta { color: var(--accent) !important; }
+[data-theme='light'] .mover-row.red .mover-meta   { color: var(--loss) !important; }
+
+/* small tweak: make % box align right and fixed width so UI is neat */
+.movelist li { display:flex; align-items:center; gap:12px; }
+.movelist li .mover-meta { min-width:120px; text-align:right; }
+
+/* ------------------ Tooltip & indices stacking fixes (append) ------------------ */
+
+/* Ensure tooltip is always visible above everything */
+.aqs-tooltip {
+  position: fixed !important;
+  z-index: 2147483647 !important;
+  pointer-events: none !important;
+  max-width: 420px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(3,7,18,0.92);
+  color: #fff;
+  box-shadow: 0 18px 40px rgba(2,6,23,0.6);
+  opacity: 0;
+  transform: translateY(6px) scale(0.98);
+  transition: opacity .12s ease, transform .12s ease;
+}
+/* show class used by JS */
+.aqs-tooltip.show { opacity: 1; transform: translateY(0) scale(1); }
+
+/* Light theme tooltip variant */
+[data-theme='light'] .aqs-tooltip {
+  background: #fff;
+  color: var(--fg);
+  border: 1px solid rgba(0,0,0,0.06);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+}
+
+/* Prevent parent transforms from creating a clipping stacking context issue by
+   ensuring index card children do not create new stacking contexts unnecessarily.
+   We set the cards to overflow-visible so the tooltip can float above if any
+   visual overflow exists around cards. The tooltip is still appended to body,
+   so this is extra safety. */
+.indices-track, .idx-card {
+  -webkit-transform: none !important;
+  transform: none !important;
+  overflow: visible !important;
+  will-change: auto !important;
+}
+
+.ticker-suggester{
+  position:absolute;z-index:1600;min-width:260px;max-width:420px;
+  background:var(--card);border:1px solid var(--panel-border);
+  border-radius:10px;box-shadow:0 10px 30px rgba(2,6,23,0.45);
+  overflow:hidden;font-size:14px;display:none;
+}
+.ticker-suggester ul{list-style:none;margin:0;padding:6px 0;max-height:320px;overflow:auto;}
+.ticker-suggester li{padding:8px 12px;cursor:pointer;color:var(--fg);display:flex;justify-content:space-between;align-items:center;}
+.ticker-suggester li:hover,.ticker-suggester li.active{background:rgba(255,255,255,0.02);}
+.ticker-suggester .meta{color:var(--muted);font-size:12px;}
+
+
+/* ---------- End of file ---------- */

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Predict — Ashish Quant Studio{% endblock %}
+
+{% block content %}
+<div class="panel max-w-form py-6">
+  <h2>Predict Next Day</h2>
+  <form id="predictForm" action="{% url 'predict' 'TICK' 1 %}" data-action-template="{% url 'predict' 'TICK' 1 %}" method="post" class="form-grid">
+    {% csrf_token %}
+    <label class="label" for="ticker">Ticker (NSE)</label>
+    <input id="ticker" name="ticker" placeholder="e.g., RELIANCE, TCS, INFY" required autocomplete="off">
+    <div class="form-actions" style="display:flex;align-items:center;gap:12px;margin-top:6px;">
+      <button type="submit" class="btn-primary">Predict next day</button>
+      <div class="hint muted">Models: XGBoost / RandomForest / Ridge</div>
+    </div>
+  </form>
+</div>
+{% endblock %}

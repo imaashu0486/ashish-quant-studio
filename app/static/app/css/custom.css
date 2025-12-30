@@ -1,0 +1,112 @@
+* { outline-color: #10b981; }
+::-webkit-scrollbar { height: 10px; width: 10px; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 999px; }
+.js-plotly-plot, .plotly-graph-div { background: transparent !important; }
+
+/* ---------------------------------------------------
+   THEME VARIABLES
+   - data-theme="dark" (default)
+   - data-theme="light"
+   --------------------------------------------------- */
+
+:root {
+  /* DARK */
+  --bg: #0b0c10;              /* page bg */
+  --surface: #14151b;         /* cards/nav bg */
+  --surface-2: #1c1f26;       /* hover bg */
+  --line: #2a2d36;            /* borders */
+  --text: #e6e6ea;            /* body text */
+  --text-dim: #a1a1aa;        /* secondary */
+  --accent: #60a5fa;          /* links/accents */
+
+  /* Switch */
+  --switch-track: #2b2f3a;
+  --switch-knob: #ffffff;
+}
+
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --surface: #f7f7f8;
+  --surface-2: #efeff2;
+  --line: #e6e6ee;
+  --text: #0f172a;
+  --text-dim: #475569;
+  --accent: #0ea5e9;
+
+  --switch-track: #d9dbe1;
+  --switch-knob: #0f172a;
+}
+
+/* ---------------------------------------------------
+   UTILITY CLASSES (use these in templates)
+   --------------------------------------------------- */
+.bg-app { background-color: var(--bg); }
+.bg-app-surface { background-color: var(--surface); }
+.bg-app-surface-2 { background-color: var(--surface-2); }
+
+.text-app { color: var(--text); }
+.text-app-dim { color: var(--text-dim); }
+
+.border-app-line { border-color: var(--line); }
+
+a { color: var(--accent); }
+a:hover { opacity: .9; }
+
+/* Nav link with animated underline */
+.nav-link {
+  position: relative;
+  padding: 0.375rem 0.75rem; /* ~px-3 py-1.5 */
+  border-radius: 0.5rem;
+  color: var(--text);
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: 0.35rem;
+  height: 2px;
+  background-color: var(--accent);
+  opacity: 0;
+  transform: scaleX(0.6);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.nav-link:hover { background-color: var(--surface-2); }
+.nav-link:hover::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* iOS-style switch */
+.bg-switch {
+  background-color: var(--switch-track);
+  transition: background-color .2s ease;
+}
+.knob {
+  position: absolute;
+  left: 2px;
+  height: 18px;
+  width: 18px;
+  border-radius: 9999px;
+  background: var(--switch-knob);
+  transition: transform .22s cubic-bezier(.4,0,.2,1), background .2s ease;
+  transform: translateX(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+.knob[data-pos="light"] { transform: translateX(18px); }
+
+/* Cards / tables you already use can opt-in */
+.card {
+  background-color: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+}
+
+/* Plotly container helper (optional) */
+.plot-wrap {
+  background-color: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}

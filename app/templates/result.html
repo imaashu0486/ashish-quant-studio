@@ -1,0 +1,288 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ ticker_value }} — Results</title>
+
+  <!-- Prefer your project dashboard.css if available (recommended) -->
+  <link rel="stylesheet" href="{% static 'app/css/dashboard.css' %}">
+
+  <!-- Small fallback / enhancement CSS (keeps the page beautiful even if dashboard.css is not present) -->
+  <style>
+    :root{
+      --paper:#0b1220; --card:#0f1724; --font:#e6eef8; --muted:#9aa0a6; --accent:#22c55e; --danger:#ef4444;
+      --border:#232732; --radius:12px; --container:1100px;
+    }
+    [data-theme='light'] {
+      --paper:#f6f8fb; --card:#ffffff; --font:#0b1220; --muted:#475569; --border:#e6e9ef;
+    }
+
+    html,body{height:100%;margin:0;padding:0;background:var(--paper);color:var(--font);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    .wrap{max-width:var(--container);margin:20px auto;padding:18px;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;}
+    .brand{font-weight:800;font-size:1.05rem}
+    .nav { display:flex; gap:8px; align-items:center; }
+    .pill{display:inline-block;padding:8px 12px;border-radius:999px;background:transparent;border:1px solid var(--border);color:var(--muted);text-decoration:none;font-weight:700}
+    .theme-toggle { padding:8px 10px;border-radius:999px;border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer; font-weight:700; }
+
+    .grid{display:grid;gap:14px;}
+    .row{display:grid;grid-template-columns:1fr;gap:14px}
+    @media(min-width:900px){ .row.two{grid-template-columns:1fr 1fr;} }
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow: 0 10px 26px rgba(2,6,23,0.45);}
+    .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+    .value{font-size:20px;font-weight:800;color:var(--font)}
+    .muted{color:var(--muted)}
+    .tiny{font-size:12px;color:var(--muted);margin-left:6px}
+    .table{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+    .table th,.table td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left}
+    .table th{color:var(--muted);font-weight:800}
+    .result-header{display:flex;flex-direction:column;gap:6px}
+    .result-summary{display:flex;gap:12px;flex-wrap:wrap}
+    .result-card{flex:1;min-width:200px;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);border:1px solid var(--border)}
+    .result-card .big{font-size:1.3rem;font-weight:900;color:var(--font)}
+    .plot-card{padding:0;border-radius:12px;overflow:hidden}
+    .plotly-container{background:transparent;padding:12px}
+    code{background:rgba(255,255,255,0.02);padding:3px 6px;border-radius:6px;color:var(--muted);font-size:13px}
+    .alert{background:#3b2121;border:1px solid #5b3131;color:#ffd9d9;border-radius:10px;padding:10px}
+
+    /* small responsive tweaks */
+    @media(max-width:600px){ .result-summary{flex-direction:column} .pill{padding:6px 8px;font-size:13px} }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">Ashish Quant Studio</div>
+    <div class="nav">
+      <a class="pill" href="{% url 'home' %}">Home</a>
+      <a class="pill" href="{% url 'search' %}">Predict</a>
+      <button id="themeToggleBtn" class="theme-toggle" aria-pressed="false" title="Toggle theme (T)">Toggle theme</button>
+    </div>
+  </div>
+
+  {% if error_message %}
+    <div class="card alert">{{ error_message }}</div>
+    <div style="height:10px"></div>
+  {% endif %}
+
+  <!-- SUMMARY -->
+  <div class="grid">
+    <div class="row two">
+      <div class="card">
+        <div class="label">Ticker</div>
+        <div class="value">{{ ticker_value }}</div>
+        <div class="muted" style="margin-top:8px">Horizon: {{ number_of_days|default:"1" }} day</div>
+      </div>
+
+      <div class="card">
+        {% if task_mode == "classification" %}
+          <div class="label">Model Accuracy (Direction %)</div>
+          <div class="value">{{ accuracy|default:"0.00" }}</div>
+          <div class="muted">Best: <span style="font-weight:800">{{ best_model|default:"—" }}</span> <span class="tiny">(ACC {{ best_value|default:"—" }}%)</span></div>
+        {% else %}
+          <div class="label">Model Accuracy (R²)</div>
+          <div class="value">{{ accuracy|floatformat:4|default:"0.0000" }}</div>
+          <div class="muted">Best: <span style="font-weight:800">{{ best_model|default:"—" }}</span> <span class="tiny">(R² {{ best_value|default:"—" }})</span></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="row two">
+      <div class="card">
+        {% if task_mode == "classification" %}
+          <div class="label">Next Day (Up Probability)</div>
+          <div class="value">{% if next_day_up_prob %}{{ next_day_up_prob }}%{% else %}—{% endif %}</div>
+        {% else %}
+          <div class="label">Next Day Prediction</div>
+          <div class="value">₹ {{ next_day_prediction|default_if_none:"—" }}</div>
+        {% endif %}
+        <div class="muted" style="margin-top:8px">
+          {% if csv_features_path %}Features CSV: <code>{{ csv_features_path }}</code><br/>{% endif %}
+          {% if csv_test_path %}Test preds CSV: <code>{{ csv_test_path }}</code>{% endif %}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Company</div>
+        <div class="value">{{ fundamentals.longName|default:ticker_value }}</div>
+        <div class="muted">{{ fundamentals.sector|default:"" }} · {{ fundamentals.industry|default:"" }}</div>
+
+        <div style="height:10px"></div>
+        <div class="label">CMP</div>
+        <div class="value">₹ {{ fundamentals.cmp|default:"—" }}</div>
+        <div class="muted">52W: ₹ {{ fundamentals.year_low|default:"—" }} — ₹ {{ fundamentals.year_high|default:"—" }}</div>
+      </div>
+    </div>
+
+    <!-- Intraday chart -->
+    <div class="card plot-card">
+      <h3 style="margin:14px">Intraday</h3>
+      <div class="plotly-container">
+        {% if plot_div %}
+          {{ plot_div|safe }}
+        {% else %}
+          <div class="muted" style="padding:18px">No intraday chart available.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- FUNDAMENTALS & METRICS -->
+    <div class="row two">
+      <div class="card">
+        <h3>Fundamentals</h3>
+        <div class="muted" style="margin-top:8px">
+          Mkt Cap: {{ fundamentals.market_cap|default:"—" }}<br/>
+          PE (TTM/Fwd): {{ fundamentals.trailing_pe|default:"—" }}/{{ fundamentals.forward_pe|default:"—" }}<br/>
+          P/B: {{ fundamentals.price_to_book|default:"—" }} · EPS: {{ fundamentals.eps|default:"—" }}<br/>
+          Beta: {{ fundamentals.beta|default:"—" }} · Div Yield: {{ fundamentals.dividend_yield|default:"—" }}<br/>
+          ROE: {{ fundamentals.roe|default:"—" }} · ROA: {{ fundamentals.roa|default:"—" }}<br/>
+          D/E: {{ fundamentals.debt_to_equity|default:"—" }} · IPO Year: {{ fundamentals.ipo_year|default:"—" }}<br/>
+          {% if fundamentals.website %}Website: <a href="{{ fundamentals.website }}" target="_blank" rel="noopener">{{ fundamentals.website }}</a>{% endif %}
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Model Summary</h3>
+        <table class="table">
+          <thead>
+          <tr>
+            <th>Model</th>
+            {% if task_mode == "classification" %}
+              <th>ACC</th><th>Precision</th><th>Recall</th><th>Next-Day</th>
+            {% else %}
+              <th>R²</th><th>MAE (ret)</th><th>Direction %</th><th>Next-Day</th>
+            {% endif %}
+          </tr>
+          </thead>
+          <tbody>
+          {% if metrics and metrics|length > 0 %}
+            {% for m in metrics %}
+              <tr>
+                <td>{{ m.Model }}</td>
+                {% if task_mode == "classification" %}
+                  <td>{{ m.ACC }}</td><td>{{ m.Precision }}</td><td>{{ m.Recall }}</td><td>{{ m.NextUpProb }}%</td>
+                {% else %}
+                  <td>{{ m.R2 }}</td><td>{{ m.MAE_ret }}</td><td>{{ m.Direction }}</td><td>₹ {{ m.NextDayPrice }}</td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr><td colspan="5" class="muted">No metrics to display.</td></tr>
+          {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Test window chart -->
+    <div class="card">
+      {% if task_mode == "classification" %}
+        <h3>Direction vs Actual (Test Window)</h3>
+      {% else %}
+        <h3>Actual vs Predicted (Test Window)</h3>
+      {% endif %}
+      <div class="plotly-container">
+        {% if plot_div_pred %}
+          {{ plot_div_pred|safe }}
+        {% else %}
+          <div class="muted">None</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Small JS: theme toggle + Plotly restyle on theme change -->
+<script>
+  (function(){
+    const root = document.documentElement;
+    const btn = document.getElementById('themeToggleBtn');
+
+    // init from localStorage if available
+    try {
+      const saved = localStorage.getItem('aqs-theme');
+      if (saved) root.setAttribute('data-theme', saved);
+    } catch(e){}
+
+    function setTheme(t){
+      root.setAttribute('data-theme', t);
+      try { localStorage.setItem('aqs-theme', t); } catch(e){}
+      btn.innerText = t === 'light' ? 'Light' : 'Dark';
+      btn.setAttribute('aria-pressed', t === 'light');
+      // update plotly colors if available
+      restylePlotlyCharts();
+    }
+
+    // toggle handler
+    btn.addEventListener('click', ()=> {
+      const cur = root.getAttribute('data-theme') || 'dark';
+      setTheme(cur === 'dark' ? 'light' : 'dark');
+    });
+
+    // keyboard quick toggle (T)
+    window.addEventListener('keydown', (e)=> { if ((e.key === 't' || e.key === 'T') && !e.metaKey && !e.ctrlKey && !e.altKey) { e.preventDefault(); const cur = root.getAttribute('data-theme') || 'dark'; setTheme(cur === 'dark' ? 'light' : 'dark'); } });
+
+    // Plotly restyle helper
+    function getThemeColors(){
+      const cs = getComputedStyle(document.documentElement);
+      const bg = cs.getPropertyValue('--paper').trim() || cs.getPropertyValue('--bg') || (root.getAttribute('data-theme') === 'light' ? '#fff' : '#0b1220');
+      const fg = cs.getPropertyValue('--font').trim() || (root.getAttribute('data-theme') === 'light' ? '#0b1220' : '#e6eef8');
+      const grid = root.getAttribute('data-theme') === 'light' ? 'rgba(11,18,32,0.06)' : 'rgba(255,255,255,0.03)';
+      const up = cs.getPropertyValue('--accent').trim() || '#22c55e';
+      const down = cs.getPropertyValue('--danger').trim() || '#ef4444';
+      return { bg, fg, grid, up, down };
+    }
+
+    function restylePlotlyCharts(){
+      if (typeof Plotly === 'undefined') return;
+      const colors = getThemeColors();
+      // find all plot roots (Plotly often sets class 'js-plotly-plot')
+      const plots = document.querySelectorAll('.js-plotly-plot');
+      plots.forEach(gd => {
+        try {
+          Plotly.relayout(gd, {
+            'paper_bgcolor': colors.bg,
+            'plot_bgcolor': colors.bg,
+            'font.color': colors.fg,
+            'xaxis.gridcolor': colors.grid,
+            'yaxis.gridcolor': colors.grid,
+            'xaxis.linecolor': colors.grid,
+            'yaxis.linecolor': colors.grid
+          });
+
+          // adjust candlestick colors if present
+          if (gd.data && gd.data.length){
+            gd.data.forEach((t,i) => {
+              if (t.type === 'candlestick' || t.increasing || t.decreasing){
+                Plotly.restyle(gd, {
+                  'increasing.fillcolor': colors.up,
+                  'increasing.line.color': colors.up,
+                  'decreasing.fillcolor': colors.down,
+                  'decreasing.line.color': colors.down
+                }, [i]);
+              }
+            });
+          }
+        } catch(e){
+          // ignore errors for non-plotly nodes
+        }
+      });
+    }
+
+    // call once on load (after tiny delay to allow Plotly to render)
+    document.addEventListener('DOMContentLoaded', ()=> setTimeout(restylePlotlyCharts, 250));
+
+    // also watch for theme toggles from other parts of app (mutation)
+    const mo = new MutationObserver((m)=> { m.forEach(x=>{ if (x.attributeName === 'data-theme') restylePlotlyCharts(); }); });
+    mo.observe(document.documentElement, { attributes: true });
+
+  })();
+</script>
+</body>
+</html>
